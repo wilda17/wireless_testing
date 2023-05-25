@@ -1,21 +1,22 @@
 import serial
 
+
 class RN2483A():
-    def __init__(self, port, baudrate, size, parity, stopbits, debug = False):
+    def __init__(self, port, baudrate, size, parity, stopbits, debug=False):
         self._debug = debug
         try:
             ser = serial.Serial(port=port,
-                baudrate=baudrate,
-                bytesize=size,
-                parity=parity,
-                stopbits=stopbits,
-                timeout=10,
-                write_timeout=10)
+                                baudrate=baudrate,
+                                bytesize=size,
+                                parity=parity,
+                                stopbits=stopbits,
+                                timeout=60,
+                                write_timeout=60)
         except serial.SerialException:
             raise Exception("No module at given port.")
         except ValueError:
             raise Exception("Wrong configuration parameter given.")
-        
+
         self._ser = ser
 
     def __del__(self):
@@ -23,8 +24,7 @@ class RN2483A():
             self._ser.close()
         except serial.SerialException:
             raise Exception("Exception while closing the port")
-     
-    
+
     def _ser_write(self, strIn):
         '''Write via serial connection to module'''
         # reset error handling flags
@@ -52,7 +52,7 @@ class RN2483A():
             raise Exception("Write failed due to timeout.")
         if transmit_incomplete:
             raise Exception("Write was incomplete.")
-        
+
     def _ser_read(self):
         '''Read via serial connection from module'''
         # read one line from parent device (blocking)
@@ -65,13 +65,21 @@ class RN2483A():
         # format output string
         received_bytes = received_bytes.decode('utf-8')
 
+        if self._debug:
+            print(received_bytes)
+
         return received_bytes
-    
+
     def _ser_write_read_verify(self, strIn, strOut=0):
         '''Perform serial write and read and verify the read output'''
         # transmit data
         self._ser_write(strIn)
 
+        return self._ser_read_verify(strOut)
+    
+    
+
+    def _ser_read_verify(self, strOut=0):
         # wait for answer
         answer = self._ser_read()
 
