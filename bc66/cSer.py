@@ -92,9 +92,10 @@ class cSer():
 
         # verify return
         if strOut != 0:
-            if self._debug > 1:
-                print("respone is: " + answer)
-                print("response should be: " + strOut)
-            assert str(answer).strip() == strOut
+            try:
+                assert str(answer).strip() == strOut
+            except AssertionError:
+                print("got wrong reply. should be: \"" +
+                      strOut + "\" but was: \"" + str(answer).strip() + "\".")
 
         return answer
